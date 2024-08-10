@@ -17,9 +17,9 @@ const ghost = "g";
 
 let ghostXPosition = 5;
 let ghost1XPosition = 2;
-let ghost1YPosition = 4;
+let ghost1YPosition = 5;
 let ghost2XPosition = 7;
-let ghost2YPosition = 5;
+let ghost2YPosition = 3;
 
 setLegend(
   [player, bitmap`
@@ -109,10 +109,9 @@ const level2 = map`
 wwwwwwwwww
 w........w
 w.p......w
-w.......gw
-w..1.....w
-w.g1..s..w
-w..1..w..w
+w..g.....w
+w..1..s..w
+w....g...w
 w..1..w..w
 wwwwwwwwww
 `;
