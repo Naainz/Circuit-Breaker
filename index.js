@@ -15,11 +15,10 @@ const switchOff = "s";
 const switchOn = "S";
 const ghost = "g";
 
-let ghostXPosition = 5;
 let ghost1XPosition = 2;
-let ghost1YPosition = 5;
+let ghost1YPosition = 3;
 let ghost2XPosition = 7;
-let ghost2YPosition = 3;
+let ghost2YPosition = 5;
 
 setLegend(
   [player, bitmap`
@@ -99,7 +98,7 @@ wwwwwwwwww
 w........w
 w.p......w
 w..1..s..w
-w..1.${".".repeat(ghostXPosition - 4)}g${".".repeat(7 - ghostXPosition)}w
+w..1..g..w
 w..1..w..w
 w..1..w..w
 wwwwwwwwww
@@ -119,7 +118,9 @@ wwwwwwwwww
 let maxSteps = 6;
 let currentSteps = 0;
 let isGameOver = false;
-let ghostInterval, ghost1Interval, ghost2Interval;
+let ghost1Direction = 1;
+let ghost2Direction = 1;
+let ghost1Interval, ghost2Interval;
 
 function updateStepCounter() {
   clearText();
@@ -132,13 +133,13 @@ function resetGame() {
   currentSteps = 0;
   isGameOver = false;
   updateStepCounter();
-  startGhostMovement();
   clearText();
+  startGhost1Movement();
+  startGhost2Movement();
 }
 
 function gameOver(message) {
   isGameOver = true;
-  clearInterval(ghostInterval);
   clearInterval(ghost1Interval);
   clearInterval(ghost2Interval);
   addText(message, { x: 1, y: 8, color: color`0` });
@@ -146,7 +147,8 @@ function gameOver(message) {
 }
 
 function moveToLevel2() {
-  clearInterval(ghostInterval);
+  clearInterval(ghost1Interval);
+  clearInterval(ghost2Interval);
   addText("Circuit Achieved!", { x: 1, y: 8, color: color`0` });
   setTimeout(() => {
     setMap(level2);
@@ -229,35 +231,16 @@ function checkGameOver() {
   }
 }
 
-function startGhostMovement() {
-  ghostInterval = setInterval(() => {
-    if (isGameOver) return;
-    const g = getFirst(ghost);
-    if (g) {
-      const newY = g.y + ghostDirection;
-      if (newY < 2 || newY > 6) {
-        ghostDirection *= -1;
-      }
-      g.y = newY;
-
-      const playerTile = getTile(g.x, g.y);
-      if (playerTile.some(tile => tile.type === player)) {
-        gameOver("You were caught!");
-      }
-    }
-  }, 200);
-}
-
 function startGhost1Movement() {
   ghost1Interval = setInterval(() => {
     if (isGameOver) return;
-    const g1 = getTile(ghost1XPosition, ghost1YPosition).find(t => t.type === ghost);
+    const g1 = getAll(ghost).find(g => g.x === ghost1XPosition && g.y === ghost1YPosition);
     if (g1) {
       const newY = g1.y + ghost1Direction;
-      if (newY < 2 || newY > 6) {
+      if (newY < 1 || newY > 6) {
         ghost1Direction *= -1;
       }
-      g1.y = newY;
+      g1.y += ghost1Direction;
 
       const playerTile = getTile(g1.x, g1.y);
       if (playerTile.some(tile => tile.type === player)) {
@@ -270,13 +253,13 @@ function startGhost1Movement() {
 function startGhost2Movement() {
   ghost2Interval = setInterval(() => {
     if (isGameOver) return;
-    const g2 = getTile(ghost2XPosition, ghost2YPosition).find(t => t.type === ghost);
+    const g2 = getAll(ghost).find(g => g.x === ghost2XPosition && g.y === ghost2YPosition);
     if (g2) {
       const newX = g2.x + ghost2Direction;
-      if (newX < 2 || newX > 7) {
+      if (newX < 1 || newX > 8) {
         ghost2Direction *= -1;
       }
-      g2.x = newX;
+      g2.x += ghost2Direction;
 
       const playerTile = getTile(g2.x, g2.y);
       if (playerTile.some(tile => tile.type === player)) {
@@ -286,7 +269,5 @@ function startGhost2Movement() {
   }, 400);
 }
 
-let ghostDirection = 1;
-let ghost1Direction = 1;
-let ghost2Direction = 1;
-startGhostMovement();
+startGhost1Movement();
+startGhost2Movement();
