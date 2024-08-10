@@ -107,51 +107,46 @@ setMap(level);
 setSolids([player, wall]);
 updateStepCounter();
 
-// Movement controls with step tracking and game over check
 onInput("w", () => {
-  const p = getFirst(player);
-  if (p && currentSteps < maxSteps) {
-    p.y -= 1;
-    currentSteps++;
-    updateStepCounter();
-    checkGameOver();
-  }
+  movePlayer(0, -1);
 });
 
 onInput("a", () => {
-  const p = getFirst(player);
-  if (p && currentSteps < maxSteps) {
-    p.x -= 1;
-    currentSteps++;
-    updateStepCounter();
-    checkGameOver();
-  }
+  movePlayer(-1, 0);
 });
 
 onInput("s", () => {
-  const p = getFirst(player);
-  if (p && currentSteps < maxSteps) {
-    p.y += 1;
-    currentSteps++;
-    updateStepCounter();
-    checkGameOver();
-  }
+  movePlayer(0, 1);
 });
 
 onInput("d", () => {
+  movePlayer(1, 0);
+});
+
+function movePlayer(dx, dy) {
   const p = getFirst(player);
   if (p && currentSteps < maxSteps) {
-    p.x += 1;
+    const newX = p.x + dx;
+    const newY = p.y + dy;
+    const destinationTile = getTile(newX, newY);
+
+    if (destinationTile.some(tile => tile.type === wall)) {
+      addText("You hit a wall!", { x: 1, y: 8, color: color`0` });
+      addText("Press W!", { x: 1, y: 9, color: color`0` });
+      return;
+    }
+
+    p.x = newX;
+    p.y = newY;
     currentSteps++;
     updateStepCounter();
     checkGameOver();
   }
-});
+}
 
 function checkGameOver() {
   const p = getFirst(player);
   if (currentSteps >= maxSteps) {
-    clearText();
     addText("Level failed!", { x: 1, y: 8, color: color`0` });
     addText("Press W!", { x: 1, y: 9, color: color`0` });
     return;
@@ -164,20 +159,18 @@ function checkGameOver() {
       clearTile(p.x, p.y);
       addSprite(p.x, p.y, switchOn);
       
-      // Activate the wire
       getAll(wire).forEach(wireTile => {
         clearTile(wireTile.x, wireTile.y);
         addSprite(wireTile.x, wireTile.y, wireActive);
       });
 
-      // Indicate circuit completed
       addText("Circuit Activated!", { x: 1, y: 1, color: color`5` });
     }
   }
 }
 
 onInput("w", () => {
-  if (currentSteps >= maxSteps) {
+  if (currentSteps >= maxSteps || getFirst(player) === undefined) {
     resetGame();
   }
 });
