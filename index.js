@@ -15,6 +15,8 @@ const switchOff = "s";
 const switchOn = "S";
 const ghost = "g";
 
+let ghostXPosition = 4;
+
 setLegend(
   [player, bitmap`
   . . . . . . . .
@@ -93,7 +95,7 @@ wwwwwwwwww
 w........w
 w.p......w
 w..1..s..w
-w..1.g.w.w
+w..1.${".".repeat(ghostXPosition - 4)}g${".".repeat(7 - ghostXPosition)}w
 w..1..w..w
 w..1..w..w
 wwwwwwwwww
@@ -193,7 +195,7 @@ function moveGhost() {
   if (g) {
     const newY = g.y + ghostDirection;
 
-    if (newY < 2 || newY > 6) { 
+    if (newY < 2 || newY > 6) {
       ghostDirection *= -1;
     }
 
