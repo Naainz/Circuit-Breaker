@@ -13,6 +13,7 @@ const wire = "1";
 const wireActive = "2";
 const switchOff = "s";
 const switchOn = "S";
+const ghost = "g";
 
 setLegend(
   [player, bitmap`
@@ -74,6 +75,16 @@ setLegend(
   . 8 . . . . 8 .
   . . 8 8 8 8 . .
   . . . . . . . .
+  `],
+  [ghost, bitmap`
+  . . . . . . . .
+  . . . 8 8 . . .
+  . . 8 8 8 8 . .
+  . 8 8 . . 8 8 .
+  . 8 8 8 8 8 8 .
+  . 8 8 8 8 8 8 .
+  . . 8 8 8 8 . .
+  . . . 8 8 . . .
   `]
 );
 
@@ -82,7 +93,7 @@ wwwwwwwwww
 w........w
 w.p......w
 w..1..s..w
-w..1..w..w
+w..1.g.w.w
 w..1..w..w
 w..1..w..w
 wwwwwwwwww
@@ -136,6 +147,12 @@ function movePlayer(dx, dy) {
       return;
     }
 
+    if (destinationTile.some(tile => tile.type === ghost)) {
+      addText("You were caught!", { x: 1, y: 8, color: color`0` });
+      addText("Press W!", { x: 1, y: 9, color: color`0` });
+      return;
+    }
+
     p.x = newX;
     p.y = newY;
     currentSteps++;
@@ -169,8 +186,25 @@ function checkGameOver() {
   }
 }
 
-onInput("w", () => {
-  if (currentSteps >= maxSteps || getFirst(player) === undefined) {
-    resetGame();
+let ghostDirection = 1;
+
+function moveGhost() {
+  const g = getFirst(ghost);
+  if (g) {
+    const newY = g.y + ghostDirection;
+
+    if (newY < 2 || newY > 6) { 
+      ghostDirection *= -1;
+    }
+
+    g.y = newY;
+
+    const playerTile = getTile(g.x, g.y);
+    if (playerTile.some(tile => tile.type === player)) {
+      addText("You were caught!", { x: 1, y: 8, color: color`0` });
+      addText("Press W!", { x: 1, y: 9, color: color`0` });
+    }
   }
-});
+}
+
+setInterval(moveGhost, 200);
