@@ -15,9 +15,17 @@ const switchOff = "s";
 const switchOn = "S";
 const ghost = "g";
 
-let ghostStartX = 4;
+let ghostStartX = 5;
 let ghost1YPosition = 4;
 let ghost1Direction = 1;
+
+let ghost2StartX = 7;
+let ghost2YPosition = 3;
+let ghost2Direction = 1;
+
+let ghost3StartX = 2;
+let ghost3YPosition = 5;
+let ghost3Direction = 1;
 
 setLegend(
   [player, bitmap`
@@ -97,7 +105,7 @@ wwwwwwwwww
 w........w
 w.p......w
 w..1..s..w
-w..1.....w
+w..1..g..w
 w..1..w..w
 w..1..w..w
 wwwwwwwwww
@@ -107,7 +115,7 @@ const level2 = map`
 wwwwwwwwww
 w........w
 w.p......w
-w..g.....w
+w........w
 w..1..s..w
 w....g...w
 w..1..w..w
@@ -117,7 +125,7 @@ wwwwwwwwww
 let maxSteps = 6;
 let currentSteps = 0;
 let isGameOver = false;
-let ghost1Interval, ghost2Interval, ghost3Interval;
+let ghost1Interval, ghost2Interval;
 
 function updateStepCounter() {
   clearText();
@@ -138,7 +146,6 @@ function gameOver(message) {
   isGameOver = true;
   clearInterval(ghost1Interval);
   clearInterval(ghost2Interval);
-  clearInterval(ghost3Interval);
   addText(message, { x: 1, y: 8, color: color`0` });
   addText("Press W!", { x: 1, y: 9, color: color`0` });
 }
@@ -146,7 +153,6 @@ function gameOver(message) {
 function moveToLevel2() {
   clearInterval(ghost1Interval);
   clearInterval(ghost2Interval);
-  clearInterval(ghost3Interval);
   addText("Circuit Achieved!", { x: 1, y: 8, color: color`0` });
   setTimeout(() => {
     setMap(level2);
@@ -249,6 +255,50 @@ function startGhost1Movement() {
       }
     }
   }, 200);
+}
+
+function startGhost2MovementLevel2() {
+  addSprite(ghost2StartX, ghost2YPosition, ghost);
+
+  ghost2Interval = setInterval(() => {
+    const g = getFirst(ghost);
+    if (g) {
+      const newY = g.y + ghost2Direction;
+
+      if (newY < 2 || newY > 6) {
+        ghost2Direction *= -1;
+      }
+
+      g.y = newY;
+
+      const playerTile = getTile(g.x, g.y);
+      if (playerTile.some(tile => tile.type === player)) {
+        gameOver("You were caught!");
+      }
+    }
+  }, 200);
+}
+
+function startGhost3MovementLevel2() {
+  addSprite(ghost3StartX, ghost3YPosition, ghost);
+
+  ghost2Interval = setInterval(() => {
+    const g = getFirst(ghost);
+    if (g) {
+      const newX = g.x + ghost3Direction;
+
+      if (newX < 1 || newX > 8) {
+        ghost3Direction *= -1;
+      }
+
+      g.x = newX;
+
+      const playerTile = getTile(g.x, g.y);
+      if (playerTile.some(tile => tile.type === player)) {
+        gameOver("You were caught!");
+      }
+    }
+  }, 400);
 }
 
 startGhost1Movement();
