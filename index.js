@@ -261,7 +261,7 @@ function moveToLevel5() {
   setTimeout(() => {
     setMap(level5);
     currentLevel = 5;
-    maxSteps = 6;  // Limiting steps to 6
+    maxSteps = 7;
     currentSteps = 0;
     isGameOver = false;
     clearText();
@@ -470,23 +470,17 @@ function startGhost5MovementLevel4() {
 
 function startGhostDiagonal1MovementLevel5() {
   addSprite(ghostDiagonal1X, ghostDiagonal1Y, ghost);
-
+  
   ghostDiagonal1Interval = setInterval(() => {
     const g = getFirst(ghost);
     if (g) {
-      let newX = g.x + ghostDiagonal1XDirection;
-      let newY = g.y + ghostDiagonal1YDirection;
+      const newY = g.y + ghost;
 
-      if (newX < 1 || newX > 8) {
+      if (newY < 2 || newY > 6) {
         ghostDiagonal1XDirection *= -1;
       }
 
-      if (newY < 1 || newY > 6) {
-        ghostDiagonal1YDirection *= -1;
-      }
-
-      g.x += ghostDiagonal1XDirection;
-      g.y += ghostDiagonal1YDirection;
+      g.y = newY;
 
       const playerTile = getTile(g.x, g.y);
       if (playerTile.some(tile => tile.type === player)) {
@@ -502,19 +496,13 @@ function startGhostDiagonal2MovementLevel5() {
   ghostDiagonal2Interval = setInterval(() => {
     const g = getFirst(ghost);
     if (g) {
-      let newX = g.x + ghostDiagonal2XDirection;
-      let newY = g.y + ghostDiagonal2YDirection;
+      const newY = g.y + ghost;
 
-      if (newX < 1 || newX > 8) {
+      if (newY < 2 || newY > 6) {
         ghostDiagonal2XDirection *= -1;
       }
 
-      if (newY < 1 || newY > 6) {
-        ghostDiagonal2YDirection *= -1;
-      }
-
-      g.x += ghostDiagonal2XDirection;
-      g.y += ghostDiagonal2YDirection;
+      g.y = newY;
 
       const playerTile = getTile(g.x, g.y);
       if (playerTile.some(tile => tile.type === player)) {
