@@ -27,6 +27,10 @@ let ghost3StartX = 2;
 let ghost3YPosition = 5;
 let ghost3Direction = 1;
 
+let ghost4StartX = 4;
+let ghost4YPosition = 2;
+let ghost4Direction = 1;
+
 setLegend(
   [player, bitmap`
   . . . . . . . .
@@ -122,10 +126,22 @@ w..1..w..w
 wwwwwwwwww
 `;
 
+const level3 = map`
+wwwwwwwwww
+w..p..g..w
+w..1..1..w
+w..g.....w
+w..1..s..w
+w........w
+w..1..w..w
+wwwwwwwwww
+`;
+
 let maxSteps = 6;
 let currentSteps = 0;
 let isGameOver = false;
-let ghost1Interval, ghost2Interval;
+let ghost1Interval, ghost2Interval, ghost3Interval, ghost4Interval;
+let currentLevel = 1; // Track the current level
 
 function updateStepCounter() {
   clearText();
@@ -133,6 +149,7 @@ function updateStepCounter() {
 }
 
 function resetGame() {
+  currentLevel = 1;
   setMap(level1);
   maxSteps = 6;
   currentSteps = 0;
@@ -146,22 +163,40 @@ function gameOver(message) {
   isGameOver = true;
   clearInterval(ghost1Interval);
   clearInterval(ghost2Interval);
+  clearInterval(ghost3Interval);
+  clearInterval(ghost4Interval);
   addText(message, { x: 1, y: 8, color: color`0` });
   addText("Press W!", { x: 1, y: 9, color: color`0` });
 }
 
 function moveToLevel2() {
   clearInterval(ghost1Interval);
-  clearInterval(ghost2Interval);
   addText("Circuit Achieved!", { x: 1, y: 8, color: color`0` });
   setTimeout(() => {
     setMap(level2);
+    currentLevel = 2;
     maxSteps = 7;
     currentSteps = 0;
     isGameOver = false;
     clearText();
     startGhost2MovementLevel2();
     startGhost3MovementLevel2();
+    updateStepCounter();
+  }, 1000);
+}
+
+function moveToLevel3() {
+  clearInterval(ghost2Interval);
+  clearInterval(ghost3Interval);
+  addText("Circuit Achieved!", { x: 1, y: 8, color: color`0` });
+  setTimeout(() => {
+    setMap(level3);
+    currentLevel = 3;
+    maxSteps = 8;
+    currentSteps = 0;
+    isGameOver = false;
+    clearText();
+    startGhost4MovementLevel3();
     updateStepCounter();
   }, 1000);
 }
@@ -231,7 +266,12 @@ function checkGameOver() {
       clearTile(wireTile.x, wireTile.y);
       addSprite(wireTile.x, wireTile.y, wireActive);
     });
-    moveToLevel2();
+
+    if (currentLevel === 1) {
+      moveToLevel2();
+    } else if (currentLevel === 2) {
+      moveToLevel3();
+    }
   }
 }
 
@@ -282,7 +322,7 @@ function startGhost2MovementLevel2() {
 function startGhost3MovementLevel2() {
   addSprite(ghost3StartX, ghost3YPosition, ghost);
 
-  ghost2Interval = setInterval(() => {
+  ghost3Interval = setInterval(() => {
     const g = getFirst(ghost);
     if (g) {
       const newX = g.x + ghost3Direction;
@@ -299,6 +339,28 @@ function startGhost3MovementLevel2() {
       }
     }
   }, 400);
+}
+
+function startGhost4MovementLevel3() {
+  addSprite(ghost4StartX, ghost4YPosition, ghost);
+
+  ghost4Interval = setInterval(() => {
+    const g = getFirst(ghost);
+    if (g) {
+      const newY = g.y + ghost4Direction;
+
+      if (newY < 2 || newY > 6) {
+        ghost4Direction *= -1;
+      }
+
+      g.y = newY;
+
+      const playerTile = getTile(g.x, g.y);
+      if (playerTile.some(tile => tile.type === player)) {
+        gameOver("You were caught!");
+      }
+    }
+  }, 300);
 }
 
 startGhost1Movement();
