@@ -35,6 +35,16 @@ let ghost5StartX = 6;
 let ghost5YPosition = 4;
 let ghost5Direction = 1;
 
+let ghostDiagonal1X = 1;
+let ghostDiagonal1Y = 1;
+let ghostDiagonal1XDirection = 1;
+let ghostDiagonal1YDirection = 1;
+
+let ghostDiagonal2X = 8;
+let ghostDiagonal2Y = 6;
+let ghostDiagonal2XDirection = -1;
+let ghostDiagonal2YDirection = -1;
+
 setLegend(
   [player, bitmap`
   . . . . . . . .
@@ -149,12 +159,24 @@ w...S....w
 w..1..s..w
 w........w
 w..1..w..w
-wwwwwwwwww`;
+wwwwwwwwww
+`;
+
+const level5 = map`
+wwwwwwwwww
+w........w
+w.p......w
+w........w
+w..1..s..w
+w....g...w
+w..1..w..w
+wwwwwwwwww
+`;
 
 let maxSteps = 6;
 let currentSteps = 0;
 let isGameOver = false;
-let ghost1Interval, ghost2Interval, ghost3Interval, ghost4Interval, ghost5Interval;
+let ghost1Interval, ghost2Interval, ghost3Interval, ghost4Interval, ghost5Interval, ghostDiagonal1Interval, ghostDiagonal2Interval;
 let currentLevel = 1; // Track the current level
 
 function updateStepCounter() {
@@ -180,6 +202,8 @@ function gameOver(message) {
   clearInterval(ghost3Interval);
   clearInterval(ghost4Interval);
   clearInterval(ghost5Interval);
+  clearInterval(ghostDiagonal1Interval);
+  clearInterval(ghostDiagonal2Interval);
   addText(message, { x: 1, y: 8, color: color`0` });
   addText("Press W!", { x: 1, y: 9, color: color`0` });
 }
@@ -229,6 +253,29 @@ function moveToLevel4() {
     startGhost5MovementLevel4();
     updateStepCounter();
   }, 1000);
+}
+
+function moveToLevel5() {
+  clearInterval(ghost5Interval);
+  addText("Circuit Achieved!", { x: 1, y: 8, color: color`0` });
+  setTimeout(() => {
+    setMap(level5);
+    currentLevel = 5;
+    maxSteps = 6;  // Limiting steps to 6
+    currentSteps = 0;
+    isGameOver = false;
+    clearText();
+    startGhostDiagonal1MovementLevel5();
+    startGhostDiagonal2MovementLevel5();
+    updateStepCounter();
+  }, 1000);
+}
+
+function showDoneScreen() {
+  clearText();
+  clearInterval(ghostDiagonal1Interval);
+  clearInterval(ghostDiagonal2Interval);
+  addText("You Won!", { x: 4, y: 4, color: color`0` });
 }
 
 setMap(level1);
@@ -303,6 +350,10 @@ function checkGameOver() {
       moveToLevel3();
     } else if (currentLevel === 3) {
       moveToLevel4();
+    } else if (currentLevel === 4) {
+      moveToLevel5();
+    } else if (currentLevel === 5) {
+      showDoneScreen();
     }
   }
 }
@@ -408,6 +459,62 @@ function startGhost5MovementLevel4() {
       }
 
       g.y = newY;
+
+      const playerTile = getTile(g.x, g.y);
+      if (playerTile.some(tile => tile.type === player)) {
+        gameOver("You were caught!");
+      }
+    }
+  }, 300);
+}
+
+function startGhostDiagonal1MovementLevel5() {
+  addSprite(ghostDiagonal1X, ghostDiagonal1Y, ghost);
+
+  ghostDiagonal1Interval = setInterval(() => {
+    const g = getFirst(ghost);
+    if (g) {
+      let newX = g.x + ghostDiagonal1XDirection;
+      let newY = g.y + ghostDiagonal1YDirection;
+
+      if (newX < 1 || newX > 8) {
+        ghostDiagonal1XDirection *= -1;
+      }
+
+      if (newY < 1 || newY > 6) {
+        ghostDiagonal1YDirection *= -1;
+      }
+
+      g.x += ghostDiagonal1XDirection;
+      g.y += ghostDiagonal1YDirection;
+
+      const playerTile = getTile(g.x, g.y);
+      if (playerTile.some(tile => tile.type === player)) {
+        gameOver("You were caught!");
+      }
+    }
+  }, 300);
+}
+
+function startGhostDiagonal2MovementLevel5() {
+  addSprite(ghostDiagonal2X, ghostDiagonal2Y, ghost);
+
+  ghostDiagonal2Interval = setInterval(() => {
+    const g = getFirst(ghost);
+    if (g) {
+      let newX = g.x + ghostDiagonal2XDirection;
+      let newY = g.y + ghostDiagonal2YDirection;
+
+      if (newX < 1 || newX > 8) {
+        ghostDiagonal2XDirection *= -1;
+      }
+
+      if (newY < 1 || newY > 6) {
+        ghostDiagonal2YDirection *= -1;
+      }
+
+      g.x += ghostDiagonal2XDirection;
+      g.y += ghostDiagonal2YDirection;
 
       const playerTile = getTile(g.x, g.y);
       if (playerTile.some(tile => tile.type === player)) {
