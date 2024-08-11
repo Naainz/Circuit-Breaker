@@ -31,6 +31,10 @@ let ghost4StartX = 4;
 let ghost4YPosition = 2;
 let ghost4Direction = 1;
 
+let ghost5StartX = 6;
+let ghost5YPosition = 4;
+let ghost5Direction = 1;
+
 setLegend(
   [player, bitmap`
   . . . . . . . .
@@ -137,10 +141,20 @@ w..1..w..w
 wwwwwwwwww
 `;
 
+const level4 = map`
+wwwwwwwwww
+w..p.....w
+w..1.S1..w
+w...S....w
+w..1..s..w
+w........w
+w..1..w..w
+wwwwwwwwww`;
+
 let maxSteps = 6;
 let currentSteps = 0;
 let isGameOver = false;
-let ghost1Interval, ghost2Interval, ghost3Interval, ghost4Interval;
+let ghost1Interval, ghost2Interval, ghost3Interval, ghost4Interval, ghost5Interval;
 let currentLevel = 1; // Track the current level
 
 function updateStepCounter() {
@@ -165,6 +179,7 @@ function gameOver(message) {
   clearInterval(ghost2Interval);
   clearInterval(ghost3Interval);
   clearInterval(ghost4Interval);
+  clearInterval(ghost5Interval);
   addText(message, { x: 1, y: 8, color: color`0` });
   addText("Press W!", { x: 1, y: 9, color: color`0` });
 }
@@ -197,6 +212,21 @@ function moveToLevel3() {
     isGameOver = false;
     clearText();
     startGhost4MovementLevel3();
+    updateStepCounter();
+  }, 1000);
+}
+
+function moveToLevel4() {
+  clearInterval(ghost4Interval);
+  addText("Circuit Achieved!", { x: 1, y: 8, color: color`0` });
+  setTimeout(() => {
+    setMap(level4);
+    currentLevel = 4;
+    maxSteps = 9;
+    currentSteps = 0;
+    isGameOver = false;
+    clearText();
+    startGhost5MovementLevel4();
     updateStepCounter();
   }, 1000);
 }
@@ -271,6 +301,8 @@ function checkGameOver() {
       moveToLevel2();
     } else if (currentLevel === 2) {
       moveToLevel3();
+    } else if (currentLevel === 3) {
+      moveToLevel4();
     }
   }
 }
@@ -351,6 +383,28 @@ function startGhost4MovementLevel3() {
 
       if (newY < 2 || newY > 6) {
         ghost4Direction *= -1;
+      }
+
+      g.y = newY;
+
+      const playerTile = getTile(g.x, g.y);
+      if (playerTile.some(tile => tile.type === player)) {
+        gameOver("You were caught!");
+      }
+    }
+  }, 300);
+}
+
+function startGhost5MovementLevel4() {
+  addSprite(ghost5StartX, ghost5YPosition, ghost);
+
+  ghost5Interval = setInterval(() => {
+    const g = getFirst(ghost);
+    if (g) {
+      const newY = g.y + ghost5Direction;
+
+      if (newY < 2 || newY > 6) {
+        ghost5Direction *= -1;
       }
 
       g.y = newY;
